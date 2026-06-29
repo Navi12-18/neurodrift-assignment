@@ -82,6 +82,7 @@ class NeuroDriftAgent(Agent):
         new_message: agents_llm.ChatMessage,
     ) -> None:
         query = _text(new_message)
+        logger.info("RAG: query='%s'", query)
         if not query:
             return
 
@@ -91,12 +92,15 @@ class NeuroDriftAgent(Agent):
             logger.warning("RAG retrieve failed, responding without context: %s", exc)
             return
 
+        logger.info("RAG: retrieved %d chunk(s)", len(chunks))
         if not chunks:
+            logger.info("RAG: no chunks found, responding without context")
             return
 
         rag_body = "\n\n".join(
             f"[Source: {c['source']}]\n{c['text']}" for c in chunks
         )
+        logger.info("RAG: injecting context (%d chars) into turn", len(rag_body))
         try:
             turn_ctx.add_message(
                 role="system",
