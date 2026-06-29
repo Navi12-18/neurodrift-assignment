@@ -8,10 +8,10 @@ End-to-end voice agent with WebRTC (LiveKit), RAG over uploaded documents, and a
 Browser (React)
     ↕ WebRTC (LiveKit)
 LiveKit Server ──── Agent Worker (Python)
-                         ├── STT  : OpenAI Whisper
-                         ├── LLM  : Anthropic Claude (claude-sonnet-4-6)
+                         ├── STT  : OpenAI Whisper (whisper-1)
+                         ├── LLM  : OpenAI GPT-4o-mini
                          ├── TTS  : OpenAI TTS (nova)
-                         └── RAG  : ChromaDB + OpenAI embeddings
+                         └── RAG  : ChromaDB + OpenAI embeddings (text-embedding-3-small)
 
 FastAPI Server
     ├── POST /api/token          → LiveKit JWT + agent dispatch
@@ -32,9 +32,9 @@ via a LiveKit data channel and shown in the "RAG Sources" panel.
 
 | Dependency | Version |
 |---|---|
-| Python | 3.11+ |
-| Node.js | 20+ |
-| LiveKit Server | latest |
+| Python | 3.10+ |
+| Node.js | 18+ |
+| LiveKit Server | cloud or self-hosted |
 
 ---
 
@@ -51,26 +51,27 @@ cp backend/.env.example backend/.env
 | `LIVEKIT_URL` | WebSocket URL of your LiveKit server (`ws://localhost:7880`) |
 | `LIVEKIT_API_KEY` | LiveKit API key (`devkey` for local dev) |
 | `LIVEKIT_API_SECRET` | LiveKit API secret (`secret` for local dev) |
-| `OPENAI_API_KEY` | OpenAI key — used for Whisper STT, TTS, and embeddings |
-| `ANTHROPIC_API_KEY` | Anthropic key — used for the LLM (Claude) |
+| `OPENAI_API_KEY` | OpenAI key — used for Whisper STT, GPT-4o-mini LLM, TTS, and embeddings |
 
 ---
 
 ## Running locally (without Docker)
 
-### 1. Start LiveKit Server
+### 1. LiveKit Setup
 
+**Option A — LiveKit Cloud (recommended, no install needed)**
+1. Sign up at [livekit.io/cloud](https://livekit.io/cloud)
+2. Create a project and copy the WebSocket URL, API Key, and API Secret into `backend/.env`
+
+**Option B — Self-hosted**
 ```bash
 # macOS/Linux
-brew install livekit
-livekit-server --dev
+brew install livekit && livekit-server --dev
 
-# Windows / Docker alternative
+# Docker
 docker run --rm -p 7880:7880 -p 7881:7881 -p 7882:7882/udp \
   -e LIVEKIT_KEYS="devkey:secret" livekit/livekit-server --dev --bind 0.0.0.0
 ```
-
-The dev flag auto-generates tokens for `devkey:secret`.
 
 ### 2. Backend — API server
 
