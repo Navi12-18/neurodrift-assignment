@@ -147,7 +147,7 @@ async def entrypoint(ctx: JobContext):
     session = AgentSession()
 
     # Forward transcripts and agent replies to the browser
-    @session.on(UserInputTranscribedEvent)
+    @session.on("user_input_transcribed")
     def _on_user_transcript(ev: UserInputTranscribedEvent):
         if ev.is_final:
             asyncio.create_task(_publish(
@@ -155,16 +155,19 @@ async def entrypoint(ctx: JobContext):
                 {"type": "transcript", "role": "user", "text": ev.transcript},
             ))
 
-    @session.on(ConversationItemAddedEvent)
+    @session.on("conversation_item_added")
     def _on_conversation_item(ev: ConversationItemAddedEvent):
         item = ev.item
-        if hasattr(item, "role") and item.role == "assistant":
-            text = _text(item)  # type: ignore[arg-type]
-            if text:
-                asyncio.create_task(_publish(
-                    ctx.room,
-                    {"type": "transcript", "role": "assistant", "text": text},
-                ))
+        if not isinstance(item, agents_llm.ChatMessage):
+            return
+        if item.role != "assistant":
+            return
+        text = item.text_content
+        if text:
+            asyncio.create_task(_publish(
+                ctx.room,
+                {"type": "transcript", "role": "assistant", "text": text},
+            ))
 
     await session.start(agent, room=ctx.room)
     session.say(
