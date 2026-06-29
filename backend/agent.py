@@ -40,17 +40,6 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 
-def _text(msg: agents_llm.ChatMessage) -> str:
-    """Extract plain text from a ChatMessage.content list."""
-    parts: list[str] = []
-    for item in msg.content:
-        if isinstance(item, str):
-            parts.append(item)
-        elif hasattr(item, "text") and item.text:
-            parts.append(item.text)
-    return " ".join(parts).strip()
-
-
 async def _publish(room, payload: dict) -> None:
     try:
         await room.local_participant.publish_data(
@@ -81,37 +70,39 @@ class NeuroDriftAgent(Agent):
         turn_ctx: agents_llm.ChatContext,
         new_message: agents_llm.ChatMessage,
     ) -> None:
-        query = _text(new_message)
+        query = new_message.text_content or ""
         logger.info("RAG: query='%s'", query)
-        if not query:
+        if not query.strip():
             return
 
         try:
             chunks = await knowledge_base.async_retrieve(query, 4)
         except Exception as exc:
-            logger.warning("RAG retrieve failed, responding without context: %s", exc)
+            logger.warning("RAG retrieve failed: %s", exc)
             return
 
         logger.info("RAG: retrieved %d chunk(s)", len(chunks))
         if not chunks:
-            logger.info("RAG: no chunks found, responding without context")
             return
 
         rag_body = "\n\n".join(
             f"[Source: {c['source']}]\n{c['text']}" for c in chunks
         )
-        logger.info("RAG: injecting context (%d chars) into turn", len(rag_body))
-        try:
-            turn_ctx.add_message(
-                role="system",
-                content=(
-                    "Relevant knowledge base context — use this to answer the user:\n"
-                    + rag_body
-                ),
-            )
-        except Exception as exc:
-            logger.warning("Failed to inject RAG context: %s", exc)
-            return
+        logger.info("RAG: injecting %d chars of context", len(rag_body))
+
+        # Inject immediately before the user's question. Explicit override prevents
+        # the persona's "say so clearly" fallback from firing when context IS present.
+        turn_ctx.add_message(
+            role="system",
+            content=(
+                "DOCUMENT CONTEXT RETRIEVED — answer the user's question using this:\n"
+                "---\n"
+                + rag_body
+                + "\n---\n"
+                "This context IS available. Extract the specific answer from it. "
+                "Do NOT say the information is unavailable or not mentioned."
+            ),
+        )
 
         ctx = get_job_context()
         if ctx:
@@ -133,15 +124,19 @@ class NeuroDriftAgent(Agent):
 
 
 async def entrypoint(ctx: JobContext):
+    # Always read from file first (file is the source of truth).
+    # Dispatch metadata is used as override only when explicitly set.
     system_prompt = get_system_prompt()
     if ctx.job.metadata:
         try:
             meta = json.loads(ctx.job.metadata)
-            system_prompt = meta.get("system_prompt", system_prompt)
+            dispatched = meta.get("system_prompt", "").strip()
+            if dispatched:
+                system_prompt = dispatched
         except Exception:
             pass
 
-    logger.info("Agent starting in room '%s'", ctx.room.name)
+    logger.info("Agent starting in room '%s' | prompt length=%d", ctx.room.name, len(system_prompt))
 
     await ctx.connect(auto_subscribe=AutoSubscribe.AUDIO_ONLY)
     participant = await ctx.wait_for_participant()
