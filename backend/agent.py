@@ -7,6 +7,7 @@ Transcripts and RAG sources are forwarded to the browser via LiveKit data channe
 import asyncio
 import json
 import logging
+from typing import Optional
 
 from dotenv import load_dotenv
 from livekit.agents import (
@@ -18,7 +19,6 @@ from livekit.agents import (
     UserInputTranscribedEvent,
     WorkerOptions,
     cli,
-    get_job_context,
     llm as agents_llm,
 )
 from livekit.plugins import openai
@@ -57,13 +57,14 @@ async def _publish(room, payload: dict) -> None:
 class NeuroDriftAgent(Agent):
     """Voice agent with automatic RAG injection on every user turn."""
 
-    def __init__(self, *, instructions: str):
+    def __init__(self, *, instructions: str, room=None):
         super().__init__(
             instructions=instructions,
             stt=openai.STT(model="whisper-1"),
             llm=openai.LLM(model="gpt-4o-mini"),
             tts=openai.TTS(voice="nova"),
         )
+        self._room = room  # stored so on_user_turn_completed can publish without get_job_context()
 
     async def on_user_turn_completed(
         self,
@@ -83,6 +84,7 @@ class NeuroDriftAgent(Agent):
 
         logger.info("RAG: retrieved %d chunk(s)", len(chunks))
         if not chunks:
+            logger.info("RAG: no chunks in KB, responding without context")
             return
 
         rag_body = "\n\n".join(
@@ -90,8 +92,6 @@ class NeuroDriftAgent(Agent):
         )
         logger.info("RAG: injecting %d chars of context", len(rag_body))
 
-        # Inject immediately before the user's question. Explicit override prevents
-        # the persona's "say so clearly" fallback from firing when context IS present.
         turn_ctx.add_message(
             role="system",
             content=(
@@ -104,10 +104,9 @@ class NeuroDriftAgent(Agent):
             ),
         )
 
-        ctx = get_job_context()
-        if ctx:
+        if self._room:
             await _publish(
-                ctx.room,
+                self._room,
                 {
                     "type": "rag_sources",
                     "sources": [
@@ -124,8 +123,8 @@ class NeuroDriftAgent(Agent):
 
 
 async def entrypoint(ctx: JobContext):
-    # Always read from file first (file is the source of truth).
-    # Dispatch metadata is used as override only when explicitly set.
+    # Always read from file first (source of truth).
+    # Dispatch metadata overrides only when explicitly set.
     system_prompt = get_system_prompt()
     if ctx.job.metadata:
         try:
@@ -142,10 +141,10 @@ async def entrypoint(ctx: JobContext):
     participant = await ctx.wait_for_participant()
     logger.info("Participant joined: %s", participant.identity)
 
-    agent = NeuroDriftAgent(instructions=system_prompt)
+    # Pass room reference so the agent can publish RAG sources directly
+    agent = NeuroDriftAgent(instructions=system_prompt, room=ctx.room)
     session = AgentSession()
 
-    # Forward transcripts and agent replies to the browser
     @session.on("user_input_transcribed")
     def _on_user_transcript(ev: UserInputTranscribedEvent):
         if ev.is_final:

@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 import chromadb
-from openai import OpenAI, AsyncOpenAI
+from openai import OpenAI
 
 from config import CHROMA_DIR, DOCS_FILE, OPENAI_API_KEY
 
@@ -111,40 +111,9 @@ def retrieve(query: str, n: int = 4) -> list[dict[str, Any]]:
 
 
 async def async_retrieve(query: str, n: int = 4) -> list[dict[str, Any]]:
-    """Async retrieval — creates AsyncOpenAI inside the running event loop to avoid
-    Windows IOCP conflicts when the client is initialised at module import time."""
-    total = _col.count()
-    if total == 0:
-        return []
-
-    client = AsyncOpenAI(api_key=OPENAI_API_KEY)
-    try:
-        resp = await client.embeddings.create(model="text-embedding-3-small", input=query)
-        embedding = resp.data[0].embedding
-    finally:
-        await client.close()
-
-    results = _col.query(
-        query_embeddings=[embedding],
-        n_results=min(n, total),
-        include=["documents", "metadatas", "distances"],
-    )
-
-    out: list[dict[str, Any]] = []
-    for doc, meta, dist in zip(
-        results["documents"][0],
-        results["metadatas"][0],
-        results["distances"][0],
-    ):
-        out.append(
-            {
-                "text": doc,
-                "source": meta["filename"],
-                "doc_id": meta["doc_id"],
-                "relevance": round(1.0 - float(dist), 3),
-            }
-        )
-    return out
+    """Run retrieve() in a thread so we never block the agent event loop."""
+    import asyncio
+    return await asyncio.to_thread(retrieve, query, n)
 
 
 def list_documents() -> list[dict]:
