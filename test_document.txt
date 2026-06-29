@@ -1,0 +1,49 @@
+NovaMind X1 — Technical Specification Sheet
+Version 2.4 | Last updated: March 2026
+
+OVERVIEW
+NovaMind X1 is a compact edge AI inference chip designed for on-device language model
+acceleration. It is manufactured by Helion Semiconductor and targets robotics, drone,
+and wearable applications.
+
+PERFORMANCE SPECS
+- Peak throughput: 48 TOPS (INT8), 24 TOPS (FP16)
+- Power envelope: 3.2 W typical, 5.8 W peak
+- Memory bandwidth: 68 GB/s via LPDDR5X
+- Supported model sizes: up to 7 billion parameters at INT4 quantization
+- Latency (first token): < 40 ms for a 3B parameter model
+
+MEMORY
+- On-chip SRAM: 32 MB
+- Supported external memory: LPDDR5X, up to 16 GB
+- ECC support: yes (optional, adds ~8% latency overhead)
+
+CONNECTIVITY
+- PCIe Gen 4 x4 host interface
+- MIPI CSI-2 camera input (up to 4 lanes)
+- USB 3.2 Gen 2 (10 Gb/s)
+- SPI, I2C, UART for peripheral control
+
+THERMAL
+- Operating temperature: -20°C to 85°C (industrial grade)
+- Junction temperature max: 105°C
+- Thermal pad footprint: 12 mm × 12 mm BGA
+
+SOFTWARE SUPPORT
+- Compatible runtimes: ONNX Runtime (EP plugin), TensorRT 9+, llama.cpp (custom backend)
+- SDK: NovaMind SDK v3.1 — includes profiler, power monitor, and quantization toolkit
+- OS support: Linux (kernel 5.15+), RTOS (FreeRTOS, Zephyr)
+
+PRICING & AVAILABILITY
+- Engineering sample (ES1): $420 per unit (MOQ 10 units)
+- Production (tape-out Q3 2026): estimated $95 per unit at 1k volume
+- Distributor: Mouser Electronics, Arrow Electronics
+
+KNOWN LIMITATIONS
+- No native INT2 quantization support (planned for X2 revision)
+- Maximum batch size of 1 for autoregressive decoding in current firmware
+- PCIe bifurcation not supported in v2.4 firmware; scheduled for v2.6
+
+CONTACT
+Technical support: support@helionsemi.io
+Sales enquiries: sales@helionsemi.io

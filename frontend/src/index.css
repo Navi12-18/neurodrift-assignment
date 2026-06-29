@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    @apply bg-surface text-slate-100 min-h-screen font-sans antialiased;
+  }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-surface-border rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-brand/50;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-surface-card border border-surface-border rounded-2xl p-4
+           shadow-[0_0_0_1px_rgba(26,44,74,0.5),0_8px_32px_rgba(0,0,0,0.4)];
+  }
+
+  .card-glass {
+    @apply rounded-2xl p-4 border border-white/5
+           bg-white/[0.03] backdrop-blur-sm
+           shadow-[0_8px_32px_rgba(0,0,0,0.4)];
+  }
+
+  .btn-primary {
+    @apply bg-brand hover:bg-brand-hover text-white font-semibold px-5 py-2.5 rounded-xl
+           transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed
+           shadow-[0_0_20px_rgba(99,102,241,0.35)] hover:shadow-[0_0_28px_rgba(99,102,241,0.55)]
+           active:scale-95;
+  }
+
+  .btn-ghost {
+    @apply text-slate-400 hover:text-slate-100 hover:bg-surface-hover px-3 py-1.5 rounded-xl
+           transition-all duration-150 active:scale-95;
+  }
+
+  .btn-danger {
+    @apply text-red-400 hover:text-red-300 hover:bg-red-500/10 px-3 py-1.5 rounded-xl
+           transition-all duration-150 active:scale-95;
+  }
+
+  .input {
+    @apply bg-surface border border-surface-border text-slate-100 placeholder-slate-600
+           rounded-xl px-3 py-2.5 w-full focus:outline-none focus:ring-2 focus:ring-brand/60
+           focus:border-brand/50 transition-all duration-200 text-sm;
+  }
+
+  .badge {
+    @apply text-xs font-semibold px-2.5 py-0.5 rounded-full;
+  }
+
+  .section-label {
+    @apply text-[10px] font-bold text-slate-500 uppercase tracking-widest;
+  }
+
+  .glow-brand {
+    box-shadow: 0 0 30px rgba(99, 102, 241, 0.4);
+  }
+}
+
+/* Animated grid background */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(99,102,241,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99,102,241,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Gradient border utility */
+.gradient-border {
+  position: relative;
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(99,102,241,0.5), rgba(129,140,248,0.1), transparent);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
