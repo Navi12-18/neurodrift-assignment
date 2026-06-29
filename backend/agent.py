@@ -86,7 +86,7 @@ class NeuroDriftAgent(Agent):
             return
 
         try:
-            chunks = await asyncio.to_thread(knowledge_base.retrieve, query, 4)
+            chunks = await knowledge_base.async_retrieve(query, 4)
         except Exception as exc:
             logger.warning("RAG retrieve failed, responding without context: %s", exc)
             return

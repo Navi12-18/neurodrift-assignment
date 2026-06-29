@@ -9,13 +9,14 @@ from pathlib import Path
 from typing import Any
 
 import chromadb
-from openai import OpenAI
+from openai import OpenAI, AsyncOpenAI
 
 from config import CHROMA_DIR, DOCS_FILE, OPENAI_API_KEY
 
 logger = logging.getLogger(__name__)
 
 _openai = OpenAI(api_key=OPENAI_API_KEY)
+_async_openai = AsyncOpenAI(api_key=OPENAI_API_KEY)
 _chroma = chromadb.PersistentClient(path=str(CHROMA_DIR))
 _col = _chroma.get_or_create_collection(
     "knowledge_base",
@@ -30,6 +31,11 @@ _col = _chroma.get_or_create_collection(
 
 def _embed(text: str) -> list[float]:
     resp = _openai.embeddings.create(model="text-embedding-3-small", input=text)
+    return resp.data[0].embedding
+
+
+async def _async_embed(text: str) -> list[float]:
+    resp = await _async_openai.embeddings.create(model="text-embedding-3-small", input=text)
     return resp.data[0].embedding
 
 
@@ -89,6 +95,36 @@ def retrieve(query: str, n: int = 4) -> list[dict[str, Any]]:
 
     results = _col.query(
         query_embeddings=[_embed(query)],
+        n_results=min(n, total),
+        include=["documents", "metadatas", "distances"],
+    )
+
+    out: list[dict[str, Any]] = []
+    for doc, meta, dist in zip(
+        results["documents"][0],
+        results["metadatas"][0],
+        results["distances"][0],
+    ):
+        out.append(
+            {
+                "text": doc,
+                "source": meta["filename"],
+                "doc_id": meta["doc_id"],
+                "relevance": round(1.0 - float(dist), 3),
+            }
+        )
+    return out
+
+
+async def async_retrieve(query: str, n: int = 4) -> list[dict[str, Any]]:
+    """Async version of retrieve — uses AsyncOpenAI so it never blocks the event loop."""
+    total = _col.count()
+    if total == 0:
+        return []
+
+    embedding = await _async_embed(query)
+    results = _col.query(
+        query_embeddings=[embedding],
         n_results=min(n, total),
         include=["documents", "metadatas", "distances"],
     )
