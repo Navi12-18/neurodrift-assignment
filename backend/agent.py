@@ -1,5 +1,5 @@
 """
-LiveKit Agent Worker — livekit-agents v1.x
+LiveKit Agent Worker - livekit-agents v1.x
 Pipeline: VAD → STT (OpenAI Whisper) → LLM (GPT-4o-mini) → TTS (OpenAI nova)
 RAG context is injected in on_user_turn_completed before each LLM call.
 Transcripts and RAG sources are forwarded to the browser via LiveKit data channel.
@@ -95,7 +95,7 @@ class NeuroDriftAgent(Agent):
         turn_ctx.add_message(
             role="system",
             content=(
-                "DOCUMENT CONTEXT RETRIEVED — answer the user's question using this:\n"
+                "DOCUMENT CONTEXT RETRIEVED - answer the user's question using this:\n"
                 "---\n"
                 + rag_body
                 + "\n---\n"

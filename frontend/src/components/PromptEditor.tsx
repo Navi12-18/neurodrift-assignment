@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Save, RotateCcw, Terminal } from "lucide-react";
 import { api } from "../lib/api";
 
-const DEFAULT = `You are a helpful voice assistant. Your responses will be spoken aloud, so keep them concise and natural — avoid bullet lists, markdown, or long explanations unless asked. When document context is provided, read it carefully and use the exact figures, names, and details from it to answer the user's question.`;
+const DEFAULT = `You are a helpful voice assistant. Your responses will be spoken aloud, so keep them concise and natural - avoid bullet lists, markdown, or long explanations unless asked. When document context is provided, read it carefully and use the exact figures, names, and details from it to answer the user's question.`;
 const MAX_CHARS = 1000;
 
 export default function PromptEditor() {

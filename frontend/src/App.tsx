@@ -108,12 +108,12 @@ export default function App() {
       {/* Main */}
       <main className="relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-[280px_1fr_280px]
                        gap-3 p-3 min-h-0">
-        {/* Left — Knowledge Base */}
+        {/* Left - Knowledge Base */}
         <aside className="flex flex-col gap-3 min-h-0">
           <KnowledgeBase />
         </aside>
 
-        {/* Center — Voice + Transcript */}
+        {/* Center - Voice + Transcript */}
         <section className="flex flex-col gap-3 min-h-0">
           {session ? (
             <LiveKitRoom
@@ -134,7 +134,7 @@ export default function App() {
           )}
         </section>
 
-        {/* Right — Prompt + RAG */}
+        {/* Right - Prompt + RAG */}
         <aside className="flex flex-col gap-3 min-h-0">
           <PromptEditor />
           <RagSources sources={ragSources} />

@@ -1,4 +1,4 @@
-NovaMind X1 — Technical Specification Sheet
+NovaMind X1 - Technical Specification Sheet
 Version 2.4 | Last updated: March 2026
 
 OVERVIEW
@@ -31,7 +31,7 @@ THERMAL
 
 SOFTWARE SUPPORT
 - Compatible runtimes: ONNX Runtime (EP plugin), TensorRT 9+, llama.cpp (custom backend)
-- SDK: NovaMind SDK v3.1 — includes profiler, power monitor, and quantization toolkit
+- SDK: NovaMind SDK v3.1 - includes profiler, power monitor, and quantization toolkit
 - OS support: Linux (kernel 5.15+), RTOS (FreeRTOS, Zephyr)
 
 PRICING & AVAILABILITY

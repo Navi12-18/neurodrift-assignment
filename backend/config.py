@@ -21,7 +21,7 @@ DOCS_FILE = DATA_DIR / "documents.json"
 
 DEFAULT_SYSTEM_PROMPT = (
     "You are a helpful voice assistant. "
-    "Your responses will be spoken aloud, so keep them concise and natural — "
+    "Your responses will be spoken aloud, so keep them concise and natural - "
     "avoid bullet lists, markdown, or long explanations unless asked. "
     "When document context is provided, read it carefully and use the exact "
     "figures, names, and details from it to answer the user's question."

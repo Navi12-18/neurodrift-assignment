@@ -1,5 +1,5 @@
 """
-FastAPI server — handles token generation, document management, and prompt CRUD.
+FastAPI server - handles token generation, document management, and prompt CRUD.
 """
 import json
 import logging
@@ -73,7 +73,7 @@ async def create_token(req: TokenRequest):
         .to_jwt()
     )
 
-    # Dispatch agent — wrapped in try/except so a version mismatch is non-fatal
+    # Dispatch agent - wrapped in try/except so a version mismatch is non-fatal
     await _dispatch_agent(req.room_name, system_prompt)
 
     return {"token": token, "url": LIVEKIT_URL, "room_name": req.room_name}
@@ -100,7 +100,7 @@ async def _dispatch_agent(room_name: str, system_prompt: str) -> None:
     except Exception as exc:
         # Dispatch may fail if the agent worker hasn't registered yet or is
         # running in a version that doesn't support explicit dispatch.
-        logger.warning("Agent dispatch skipped (%s) — ensure agent worker is running.", exc)
+        logger.warning("Agent dispatch skipped (%s) - ensure agent worker is running.", exc)
 
 
 # ---------------------------------------------------------------------------

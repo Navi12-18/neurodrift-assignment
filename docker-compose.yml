@@ -12,7 +12,7 @@ services:
     environment:
       - LIVEKIT_KEYS=devkey:secret
 
-  # ── FastAPI — token + KB + prompt endpoints ───────────────────────────────
+  # ── FastAPI - token + KB + prompt endpoints ───────────────────────────────
   api:
     build:
       context: ./backend

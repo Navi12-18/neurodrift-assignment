@@ -15,7 +15,7 @@ build/
 # Env files (never commit real credentials)
 backend/.env
 
-# Data (chroma + uploaded docs — these are user data, not source)
+# Data (chroma + uploaded docs - these are user data, not source)
 backend/data/
 
 # Node

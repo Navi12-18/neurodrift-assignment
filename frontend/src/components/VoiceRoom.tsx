@@ -100,7 +100,7 @@ export default function VoiceRoom({ onDisconnect, onData }: Props) {
       {/* Orb + Visualizer */}
       <div className="flex flex-col items-center gap-4 py-3">
         <div className="relative flex items-center justify-center w-36 h-36">
-          {/* Pulse rings — visible when speaking or listening */}
+          {/* Pulse rings - visible when speaking or listening */}
           {(agentState === "speaking" || agentState === "listening") && (
             <>
               <span className="absolute inset-0 rounded-full bg-current opacity-10 animate-ring-1"

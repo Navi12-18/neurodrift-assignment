@@ -1,4 +1,4 @@
-# NeuroDrift — Real-Time Voice AI Agent
+# NeuroDrift - Real-Time Voice AI Agent
 
 End-to-end voice agent with WebRTC (LiveKit), RAG over uploaded documents, and a React UI.
 
@@ -51,7 +51,7 @@ cp backend/.env.example backend/.env
 | `LIVEKIT_URL` | WebSocket URL of your LiveKit server (`ws://localhost:7880`) |
 | `LIVEKIT_API_KEY` | LiveKit API key (`devkey` for local dev) |
 | `LIVEKIT_API_SECRET` | LiveKit API secret (`secret` for local dev) |
-| `OPENAI_API_KEY` | OpenAI key — used for Whisper STT, GPT-4o-mini LLM, TTS, and embeddings |
+| `OPENAI_API_KEY` | OpenAI key - used for Whisper STT, GPT-4o-mini LLM, TTS, and embeddings |
 
 ---
 
@@ -59,11 +59,11 @@ cp backend/.env.example backend/.env
 
 ### 1. LiveKit Setup
 
-**Option A — LiveKit Cloud (recommended, no install needed)**
+**Option A - LiveKit Cloud (recommended, no install needed)**
 1. Sign up at [livekit.io/cloud](https://livekit.io/cloud)
 2. Create a project and copy the WebSocket URL, API Key, and API Secret into `backend/.env`
 
-**Option B — Self-hosted**
+**Option B - Self-hosted**
 ```bash
 # macOS/Linux
 brew install livekit && livekit-server --dev
@@ -73,7 +73,7 @@ docker run --rm -p 7880:7880 -p 7881:7881 -p 7882:7882/udp \
   -e LIVEKIT_KEYS="devkey:secret" livekit/livekit-server --dev --bind 0.0.0.0
 ```
 
-### 2. Backend — API server
+### 2. Backend - API server
 
 ```bash
 cd backend
@@ -91,7 +91,7 @@ python api.py
 # → API listening on http://localhost:8000
 ```
 
-### 3. Backend — Agent Worker
+### 3. Backend - Agent Worker
 
 In a separate terminal (same virtualenv):
 
@@ -124,19 +124,19 @@ docker compose up --build
 ```
 
 Services:
-- **LiveKit** — `ws://localhost:7880`
-- **API** — `http://localhost:8000`
-- **Frontend** — `http://localhost:3000`
+- **LiveKit** - `ws://localhost:7880`
+- **API** - `http://localhost:8000`
+- **Frontend** - `http://localhost:3000`
 
 ---
 
 ## Usage
 
-1. **Upload documents** — drag & drop PDFs, TXT, or DOCX files into the Knowledge Base panel. Each document is chunked, embedded, and stored in ChromaDB.
-2. **Edit system prompt** — customize the agent's persona and instructions in the System Prompt panel and click **Save**.
-3. **Start a call** — click **Start Call**. The frontend connects to LiveKit and the agent worker joins the room automatically.
-4. **Talk** — click the microphone button and ask a question. If relevant documents are in the KB, the agent retrieves them and answers using that context.
-5. **See RAG sources** — after each answer, the "RAG Sources Used" panel shows which document chunks were retrieved.
+1. **Upload documents** - drag & drop PDFs, TXT, or DOCX files into the Knowledge Base panel. Each document is chunked, embedded, and stored in ChromaDB.
+2. **Edit system prompt** - customize the agent's persona and instructions in the System Prompt panel and click **Save**.
+3. **Start a call** - click **Start Call**. The frontend connects to LiveKit and the agent worker joins the room automatically.
+4. **Talk** - click the microphone button and ask a question. If relevant documents are in the KB, the agent retrieves them and answers using that context.
+5. **See RAG sources** - after each answer, the "RAG Sources Used" panel shows which document chunks were retrieved.
 
 ---
 
@@ -173,9 +173,9 @@ neurodrift/
 
 ## Known Limitations / Tradeoffs
 
-- **Agent dispatch** — explicit dispatch via `livekit.protocol.agent.CreateAgentDispatchRequest` requires `livekit-api>=0.7.0`. If your version does not support this, configure the LiveKit server with auto-dispatch rules or trigger dispatch manually.
-- **Shared data volume** — the API server and agent worker share the `data/` directory for ChromaDB and the system prompt file. In production, replace with a shared network volume or a remote vector store (Pinecone, Weaviate).
-- **Embeddings cost** — every uploaded document chunk calls OpenAI's embedding API. For large knowledge bases, consider batching or a local embedding model (e.g., `sentence-transformers`).
-- **No authentication** — the API is open. Add an auth layer before exposing to the internet.
-- **Single room** — each call creates a new LiveKit room. Multi-room session management is not implemented.
-- **Transcript persistence** — transcripts live in React state only and are lost on page refresh.
+- **Agent dispatch** - explicit dispatch via `livekit.protocol.agent.CreateAgentDispatchRequest` requires `livekit-api>=0.7.0`. If your version does not support this, configure the LiveKit server with auto-dispatch rules or trigger dispatch manually.
+- **Shared data volume** - the API server and agent worker share the `data/` directory for ChromaDB and the system prompt file. In production, replace with a shared network volume or a remote vector store (Pinecone, Weaviate).
+- **Embeddings cost** - every uploaded document chunk calls OpenAI's embedding API. For large knowledge bases, consider batching or a local embedding model (e.g., `sentence-transformers`).
+- **No authentication** - the API is open. Add an auth layer before exposing to the internet.
+- **Single room** - each call creates a new LiveKit room. Multi-room session management is not implemented.
+- **Transcript persistence** - transcripts live in React state only and are lost on page refresh.
