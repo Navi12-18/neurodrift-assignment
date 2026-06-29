@@ -85,20 +85,29 @@ class NeuroDriftAgent(Agent):
         if not query:
             return
 
-        chunks = await asyncio.to_thread(knowledge_base.retrieve, query, 4)
+        try:
+            chunks = await asyncio.to_thread(knowledge_base.retrieve, query, 4)
+        except Exception as exc:
+            logger.warning("RAG retrieve failed, responding without context: %s", exc)
+            return
+
         if not chunks:
             return
 
         rag_body = "\n\n".join(
             f"[Source: {c['source']}]\n{c['text']}" for c in chunks
         )
-        turn_ctx.add_message(
-            role="system",
-            content=(
-                "Relevant knowledge base context — use this to answer the user:\n"
-                + rag_body
-            ),
-        )
+        try:
+            turn_ctx.add_message(
+                role="system",
+                content=(
+                    "Relevant knowledge base context — use this to answer the user:\n"
+                    + rag_body
+                ),
+            )
+        except Exception as exc:
+            logger.warning("Failed to inject RAG context: %s", exc)
+            return
 
         ctx = get_job_context()
         if ctx:

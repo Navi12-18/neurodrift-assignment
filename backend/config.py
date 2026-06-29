@@ -10,7 +10,9 @@ LIVEKIT_API_KEY = os.environ.get("LIVEKIT_API_KEY", "devkey")
 LIVEKIT_API_SECRET = os.environ.get("LIVEKIT_API_SECRET", "secret")
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 
-DATA_DIR = Path(os.environ.get("DATA_DIR", "data"))
+# Absolute path so subprocesses with different cwd still find the right dir
+_HERE = Path(__file__).resolve().parent
+DATA_DIR = Path(os.environ.get("DATA_DIR", str(_HERE / "data")))
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 CHROMA_DIR = DATA_DIR / "chroma"
